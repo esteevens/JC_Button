@@ -5,13 +5,25 @@
 
 #include "JC_Button.h"
 
+bool digitalOrAnalogRead(uint8_t pin)
+{
+	if (pin == A0)
+	{
+		return (analogRead(pin) > 512);
+	}
+	else
+	{
+		return digitalRead(pin);
+	}
+}
+
 /*----------------------------------------------------------------------*
 / initialize a Button object and the pin it's connected to.             *
 /-----------------------------------------------------------------------*/
 void Button::begin()
 {
     pinMode(m_pin, m_puEnable ? INPUT_PULLUP : INPUT);
-    m_state = digitalRead(m_pin);
+    m_state = digitalOrAnalogRead(m_pin);
     if (m_invert) m_state = !m_state;
     m_time = millis();
     m_lastState = m_state;
@@ -26,7 +38,7 @@ void Button::begin()
 bool Button::read()
 {
     uint32_t ms = millis();
-    bool pinVal = digitalRead(m_pin);
+    bool pinVal = digitalOrAnalogRead(m_pin);
     if (m_invert) pinVal = !pinVal;
     if (ms - m_lastChange < m_dbTime)
     {
