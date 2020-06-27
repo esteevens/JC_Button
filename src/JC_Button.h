@@ -69,6 +69,8 @@ class Button
         bool m_changed;         // state changed since last read
         uint32_t m_time;        // time of current state (ms from millis)
         uint32_t m_lastChange;  // time of last state change (ms)
+
+		bool digitalOrAnalogRead(uint8_t pin);
 };
 
 // a derived class for a "push-on, push-off" (toggle) type button.

@@ -5,11 +5,20 @@
 
 #include "JC_Button.h"
 
-bool digitalOrAnalogRead(uint8_t pin)
+bool Button::digitalOrAnalogRead(uint8_t pin)
 {
 	if (pin == A0)
 	{
-		return (analogRead(pin) > 512);
+	  // Slow down reading the ADC
+	  static unsigned long lastRead = 0;
+	  static bool lastState = false;
+	  if (millis() - lastRead > 100)
+	  {
+		lastRead = millis();
+		lastState = (analogRead(pin) > 512);
+		return lastState;
+	  }
+	  return lastState;
 	}
 	else
 	{
