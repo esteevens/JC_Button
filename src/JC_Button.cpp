@@ -5,25 +5,25 @@
 
 #include "JC_Button.h"
 
-bool Button::digitalOrAnalogRead(uint8_t pin)
+bool Button::digitalOrAnalogRead()
 {
-	if (pin == A0)
+	#ifdef ESP8266
+	if (m_analogPin)
 	{
-	  // Slow down reading the ADC
-	  static unsigned long lastRead = 0;
-	  static bool lastState = false;
-	  if (millis() - lastRead > 100)
+	  // Slow down reading the analog pin on ESP8266
+	  if (millis() - m_lastAnalogReadTime > 100)
 	  {
-		lastRead = millis();
-		lastState = (analogRead(pin) > 512);
-		return lastState;
+		m_lastRead = (analogRead(m_pin) > 512);
+		m_lastAnalogReadTime = millis();
 	  }
-	  return lastState;
 	}
 	else
+	#endif
 	{
-		return digitalRead(pin);
+		m_lastRead = digitalRead(m_pin);
 	}
+	
+	return m_lastRead;
 }
 
 /*----------------------------------------------------------------------*
@@ -32,7 +32,7 @@ bool Button::digitalOrAnalogRead(uint8_t pin)
 void Button::begin()
 {
     pinMode(m_pin, m_puEnable ? INPUT_PULLUP : INPUT);
-    m_state = digitalOrAnalogRead(m_pin);
+    m_state = digitalOrAnalogRead();
     if (m_invert) m_state = !m_state;
     m_time = millis();
     m_lastState = m_state;
@@ -47,7 +47,7 @@ void Button::begin()
 bool Button::read()
 {
     uint32_t ms = millis();
-    bool pinVal = digitalOrAnalogRead(m_pin);
+    bool pinVal = digitalOrAnalogRead();
     if (m_invert) pinVal = !pinVal;
     if (ms - m_lastChange < m_dbTime)
     {

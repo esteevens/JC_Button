@@ -21,7 +21,16 @@ class Button
         // puEnable true to enable the AVR internal pullup resistor (default true)
         // invert   true to interpret a low logic level as pressed (default true)
         Button(uint8_t pin, uint32_t dbTime=25, uint8_t puEnable=true, uint8_t invert=true)
-            : m_pin(pin), m_dbTime(dbTime), m_puEnable(puEnable), m_invert(invert) {}
+            : m_pin(pin), m_dbTime(dbTime), m_puEnable(puEnable), m_invert(invert)
+			{
+				#ifdef ESP8266
+				if(pin == A0)
+				{
+					m_analogPin = true;
+					m_dbTime = 0;
+				}
+				#endif
+			}
 
         // Initialize a Button object and the pin it's connected to
         void begin();
@@ -67,10 +76,13 @@ class Button
         bool m_state;           // current button state, true=pressed
         bool m_lastState;       // previous button state
         bool m_changed;         // state changed since last read
-        uint32_t m_time;        // time of current state (ms from millis)
+		bool m_analogPin;		//
+		uint32_t m_time;        // time of current state (ms from millis)
+		bool m_lastRead;
+		uint32_t m_lastAnalogReadTime;
         uint32_t m_lastChange;  // time of last state change (ms)
-
-		bool digitalOrAnalogRead(uint8_t pin);
+		
+		bool digitalOrAnalogRead();
 };
 
 // a derived class for a "push-on, push-off" (toggle) type button.
